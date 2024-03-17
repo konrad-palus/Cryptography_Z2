@@ -19,19 +19,52 @@ namespace Z2
 
             foreach (var algo in algorithms)
             {
-                HashAlgorithm hashAlgorithm = HashAlgorithm.Create(algo);
-
-                if (hashAlgorithm == null)
+                using (HashAlgorithm hashAlgorithm = HashAlgorithm.Create(algo))
                 {
-                    Console.WriteLine($"{algo} is not avaliable.");
-                    continue;
+                    if (hashAlgorithm == null)
+                    {
+                        Console.WriteLine($"{algo} is not available.");
+                        continue;
+                    }
+
+                    Stopwatch stopwatch = Stopwatch.StartNew();
+                    byte[] hash = hashAlgorithm.ComputeHash(inputBytes);
+                    stopwatch.Stop();
+
+                    string hashAsString = BitConverter.ToString(hash).Replace("-", "");
+                    Console.WriteLine($"{algo} hash: {hashAsString}");
+                    //niestety w każdej konfiguracji czas hashowania u mnie wynosi 0 milisekund więc umieszczam mierzenie czasu w tickach
+                    Console.WriteLine($"Hashing time ticks: {stopwatch.ElapsedTicks}");
                 }
+            }
+        }
 
-                Stopwatch stopwatch = Stopwatch.StartNew();
-                stopwatch.Stop();
 
-                Console.WriteLine($"{algo} hash: {BitConverter.ToString(hashAlgorithm.ComputeHash(inputBytes)).Replace("-", "")}");
-                Console.WriteLine($"Czas hashowania (ms): {stopwatch.ElapsedMilliseconds}");
+        public void HashFile(string filePath)
+        {
+            string[] algorithms = { Md5, Sha1, Sha256, Sha384, Sha512 };
+
+            foreach (var algo in algorithms)
+            {
+                using (HashAlgorithm hashAlgorithm = HashAlgorithm.Create(algo))
+                {
+                    if (hashAlgorithm == null)
+                    {
+                        Console.WriteLine($"{algo} is not available.");
+                        continue;
+                    }
+
+                    using (var stream = File.OpenRead(filePath))
+                    {
+                        Stopwatch stopwatch = Stopwatch.StartNew();
+                        byte[] hash = hashAlgorithm.ComputeHash(stream);
+                        stopwatch.Stop();
+
+                        string hashAsString = BitConverter.ToString(hash).Replace("-", "");
+                        Console.WriteLine($"{algo} hash of file: {hashAsString}");
+                        Console.WriteLine($"Hashing time for {algo} ticks): {stopwatch.ElapsedTicks}");
+                    }
+                }
             }
         }
     }
