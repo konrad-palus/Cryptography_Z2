@@ -19,23 +19,23 @@ namespace Z2
 
             foreach (var algo in algorithms)
             {
-                using (HashAlgorithm hashAlgorithm = HashAlgorithm.Create(algo))
+                using HashAlgorithm hashAlgorithm = HashAlgorithm.Create(algo);
+
+                if (hashAlgorithm == null)
                 {
-                    if (hashAlgorithm == null)
-                    {
-                        Console.WriteLine($"{algo} is not available.");
-                        continue;
-                    }
-
-                    Stopwatch stopwatch = Stopwatch.StartNew();
-                    byte[] hash = hashAlgorithm.ComputeHash(inputBytes);
-                    stopwatch.Stop();
-
-                    string hashAsString = BitConverter.ToString(hash).Replace("-", "");
-                    Console.WriteLine($"{algo} hash: {hashAsString}");
-                    //niestety w każdej konfiguracji czas hashowania u mnie wynosi 0 milisekund więc umieszczam mierzenie czasu w tickach
-                    Console.WriteLine($"Hashing time ticks: {stopwatch.ElapsedTicks}");
+                    Console.WriteLine($"{algo} is not available.");
+                    continue;
                 }
+
+                Stopwatch stopwatch = Stopwatch.StartNew();
+                byte[] hash = hashAlgorithm.ComputeHash(inputBytes);
+                stopwatch.Stop();
+
+                string hashAsString = BitConverter.ToString(hash).Replace("-", "");
+                Console.WriteLine($"{algo} hash: {hashAsString}");
+                //niestety w każdej konfiguracji czas hashowania u mnie wynosi 0 milisekund więc umieszczam mierzenie czasu w tickach
+                Console.WriteLine($"Hashing time ticks: {stopwatch.ElapsedTicks}");
+
             }
         }
 
@@ -54,17 +54,34 @@ namespace Z2
                         continue;
                     }
 
-                    using (var stream = File.OpenRead(filePath))
-                    {
-                        Stopwatch stopwatch = Stopwatch.StartNew();
-                        byte[] hash = hashAlgorithm.ComputeHash(stream);
-                        stopwatch.Stop();
+                    using var stream = File.OpenRead(filePath);
+                    Stopwatch stopwatch = Stopwatch.StartNew();
+                    byte[] hash = hashAlgorithm.ComputeHash(stream);
+                    stopwatch.Stop();
 
-                        string hashAsString = BitConverter.ToString(hash).Replace("-", "");
-                        Console.WriteLine($"{algo} hash of file: {hashAsString}");
-                        Console.WriteLine($"Hashing time for {algo} ticks): {stopwatch.ElapsedTicks}");
-                    }
+                    string hashAsString = BitConverter.ToString(hash).Replace("-", "");
+                    Console.WriteLine($"{algo} hash of file: {hashAsString}");
+                    Console.WriteLine($"Hashing time for {algo} ticks): {stopwatch.ElapsedTicks}");
                 }
+            }
+        }
+
+
+
+        public void TestHashingSpeed()
+        {
+            int[] sizes = new int[] { 1, 10, 100, 1000, 10000, 100000 };
+            foreach (int size in sizes)
+            {
+                byte[] data = new byte[size * 1024];
+                new Random().NextBytes(data);
+
+                using HashAlgorithm hashAlgorithm = SHA256.Create();
+                Stopwatch stopwatch = Stopwatch.StartNew();
+                byte[] hash = hashAlgorithm.ComputeHash(data);
+                stopwatch.Stop();
+
+                Console.WriteLine($"Hashing {size}KB of data took {stopwatch.ElapsedMilliseconds}ms");
             }
         }
     }

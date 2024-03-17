@@ -13,10 +13,8 @@
                 hashingExample.HashInput(inputText);
             }
 
-            string userFolderPath = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
-            string directoryPath = Path.Combine(userFolderPath, "x");
-            string fileName = "ubuntu.iso"; 
-            string outputPath = Path.Combine(directoryPath, fileName);
+            string directoryPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "x");
+            string outputPath = Path.Combine(directoryPath, "ubuntu.iso");
 
             Directory.CreateDirectory(directoryPath);
 
@@ -29,10 +27,8 @@
             hashingExample.HashInput(outputPath);
 
 
-
-
-         
-
+            Console.WriteLine("\nTesting hashing speed for different message sizes:");
+            hashingExample.TestHashingSpeed();
         }
     }
 }
